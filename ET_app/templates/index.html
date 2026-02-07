@@ -1,0 +1,387 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login & Expense App</title>
+
+    <!-- Google Icons -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+    />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'ET_app/css/style.css' %}" />
+  </head>
+  <style>
+    .logo {
+      display: inline-block; /* makes it behave like a block but inline */
+      font-size: 1.8rem; /* bigger, stands out */
+      font-weight: 700; /* bold text */
+      color: #172c40; /* dark blue-gray color */
+      text-decoration: none; /* remove underline */
+      letter-spacing: 1px; /* adds some spacing between letters */
+      padding: 5px 10px; /* small padding around the text */
+      transition: color 0.3s ease; /* smooth color change on hover */
+    }
+
+    .logo:hover {
+      color: #b5c6d0; /* bright blue on hover */
+      cursor: pointer; /* shows pointer on hover */
+    }
+
+    .logo span {
+      /* optional, in case you want to style part of text differently */
+      color: inherit; /* inherits parent color */
+    }
+  </style>
+  <body>
+    <header>
+      <nav class="navbar">
+        {% comment %}
+        <span class="hamburger-btn material-symbols-rounded">menu</span> {%endcomment %}
+
+        <a href="#" class="logo">
+          <span>Expense Tracker</span>
+        </a>
+
+        <ul class="links">
+          {% comment %}
+          <span class="close-btn material-symbols-rounded">close</span>
+          {% endcomment %}
+          <li><a href="{% url 'login' %}">Home</a></li>
+          <li><a href="{% url 'expense_list' %}">Expense List</a></li>
+          {% comment %}
+          <li><a href="#">Courses</a></li>
+          {% endcomment %}
+          {% comment %} <li><a href="#">About</a></li> {% endcomment %}
+          {% comment %} <li><a href="#">Contact</a></li> {% endcomment %}
+        </ul>
+
+        <button id="logOutbutton" class="login-btn" onclick="log_out()">
+          LOG OUT
+        </button>
+
+        <button id="logInbutton" class="login-btn" onclick="openLogin()">
+          LOG IN
+        </button>
+      </nav>
+    </header>
+
+    <!-- Center Add Expense Button -->
+    <div class="center-expense">
+      <button class="expense-btn" onclick="openExpense()">+ Add Expense</button>
+    </div>
+
+    <div class="blur-bg-overlay"></div>
+
+    <!-- Login / Signup Popup -->
+   <div class="form-popup">
+  <span class="close-btn material-symbols-rounded" onclick="closeAll()">close</span>
+
+  <!-- LOGIN FORM -->
+  <div class="form-box login" id="loginBox">
+    <div class="form-details">
+      <h2>Welcome Back</h2>
+      <p>Please login to continue</p>
+    </div>
+
+    <div class="form-content">
+      <h2>LOGIN</h2>
+      <form onsubmit="login(event)">
+        <div class="input-field">
+          <input id="username" type="text" required />
+          <label>Username</label>
+        </div>
+
+        <div class="input-field">
+          <input id="password" type="password" required />
+          <label>Password</label>
+        </div>
+
+        <button>Log In</button>
+      </form>
+
+      <p class="switch">
+        Don’t have an account?
+        <span onclick="showSignup()">Sign Up</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <div class="form-box signup" id="signupBox" style="display:none;">
+    <div class="form-details">
+      <h2>Create Account</h2>
+      <p>Join us today</p>
+    </div>
+
+    <div class="form-content">
+      <h2>SIGN UP</h2>
+      <form method="post" action="{% url 'sign_up'%}" >
+        {% csrf_token %} 
+        <div class="input-field">
+          <input type="text" name="username" required />
+          <label>Username</label>
+        </div>
+
+        <div class="input-field">
+          <input type="email" name="email" required />
+          <label>Email</label>
+        </div>
+
+        <div class="input-field">
+          <input type="password" name="password" required />
+          <label>Password</label>
+        </div>
+
+        <button type="submit" >Create Account</button>
+      </form>
+
+      <p class="switch">
+        Already have an account?
+        <span onclick="showLogin()">Login</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+    <script>
+  function showSignup() {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("signupBox").style.display = "block";
+  }
+
+  function showLogin() {
+    document.getElementById("signupBox").style.display = "none";
+    document.getElementById("loginBox").style.display = "block";
+  }
+
+  function closeAll() {
+    document.querySelector(".form-popup").style.display = "none";
+  }
+
+  function login(e) {
+    e.preventDefault();
+    alert("Login submitted");
+  }
+
+  function signup(e) {
+    e.preventDefault();
+    alert("Signup submitted");
+  }
+</script>
+
+
+    <!-- Expense Popup -->
+    <div class="expense-popup">
+      <span class="close-btn material-symbols-rounded" onclick="closeAll()"
+        >close</span>
+
+      <div class="form-box">
+        <div class="form-content">
+          <h2>ADD EXPENSE</h2>
+
+          <form onsubmit="addExpense(event)">
+            <div class="input-field">
+              {% comment %} <input id="category" type="text" required /> {%endcomment %}
+              {% comment %} <label>Category</label> {% endcomment %}
+
+              <select id="category">
+                <option value="">-- Select an item --</option>
+              </select>
+            </div>
+
+            <div class="input-field">
+              <input id="amount" type="number" required />
+              <label>Amount</label>
+            </div>
+
+            <div class="input-field">
+              <input id="description" type="text" required />
+              <label>Description</label>
+            </div>
+
+            <button>Save Expense</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openLogin() {
+        document.body.classList.add("show-login");
+      }
+      function openExpense() {
+        populateSelect();
+        document.body.classList.add("show-expense");
+      }
+      function closeAll() {
+        document.body.classList.remove("show-login", "show-expense");
+      }
+      function closeExpense() {
+        document.body.classList.remove("show-expense");
+      }
+    </script>
+    <script>
+      function log_view() {
+        const token = localStorage.getItem("access");
+        const refresh_token = localStorage.getItem("refresh");
+        if (token || refresh_token) {
+          document.getElementById("logInbutton").style.display = "none";
+          document.getElementById("logOutbutton").style.display = "block";
+        } else {
+          document.getElementById("logInbutton").style.display = "block";
+          document.getElementById("logOutbutton").style.display = "none";
+        }
+      }
+    </script>
+    <script>
+      log_view();
+    </script>
+
+    <script>
+      async function login(event) {
+        event.preventDefault();
+
+        const res = await fetch("http://127.0.0.1:8000/token/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: document.getElementById("username").value,
+            password: document.getElementById("password").value,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("access", data.access);
+          localStorage.setItem("refresh", data.refresh);
+
+          alert("Login Successfull");
+
+          window.location.href = "http://127.0.0.1:8000/login/";
+        } else {
+          alert("password or useraname is wrong");
+        }
+      }
+    </script>
+    <script>
+      function log_out() {
+        localStorage.removeItem("access");
+        localStorage.removeItem("refresh");
+
+        window.location.href = "http://127.0.0.1:8000/login/";
+      }
+    </script>
+
+    <script>
+      async function addExpense(event) {
+        event.preventDefault();
+
+        let access = localStorage.getItem("access");
+
+        let res = await fetch("http://127.0.0.1:8000/expense/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + access,
+          },
+          body: JSON.stringify({
+            category: document.getElementById("category").value,
+            amount: document.getElementById("amount").value,
+            description: document.getElementById("description").value,
+          }),
+        });
+
+        // 🔴 ACCESS TOKEN EXPIRED
+        if (res.status === 401) {
+          console.log("Access expired → refreshing");
+
+          const refreshRes = await fetch(
+            "http://127.0.0.1:8000/refresh_token/",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                refresh: localStorage.getItem("refresh"),
+              }),
+            },
+          );
+
+          // ❌ Refresh token expired
+          if (!refreshRes.ok) {
+            alert("Session expired, login again");
+            closeExpense();
+            openLogin();
+            return;
+          }
+
+          const refreshData = await refreshRes.json();
+          localStorage.setItem("access", refreshData.access);
+
+          // 🔁 retry original request
+          return addExpense(event);
+        }
+
+        if (res.ok) {
+          alert("Expense added successfully ✅");
+          event.target.reset(); // clear form
+        }
+      }
+    </script>
+
+   <script>
+async function populateSelect() {
+  try {
+    let access = localStorage.getItem("access");
+    if (!access) return;
+
+    let res = await fetch("http://127.0.0.1:8000/category/", {
+      headers: {
+        Authorization: "Bearer " + access,
+      },
+    });
+
+    // 🔁 Access token expired
+    if (res.status === 401) {
+      access = await refreshAccessToken();
+      if (!access) return;
+
+      res = await fetch("http://127.0.0.1:8000/category/", {
+        headers: {
+          Authorization: "Bearer " + access,
+        },
+      });
+    }
+
+    if (!res.ok) throw new Error(`API error ${res.status}`);
+
+    const json = await res.json();
+    const data = json.results || json;
+
+    const select = document.getElementById("category");
+    select.innerHTML = '<option value="">Select Category</option>';
+
+    data.forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.name;
+      select.appendChild(option);
+    });
+
+  } catch (err) {
+    console.error("Fetch failed:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", populateSelect);
+</script>
+
+  </body>
+</html>

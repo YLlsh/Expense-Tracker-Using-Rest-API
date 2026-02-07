@@ -1,0 +1,371 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+
+    <!-- Google Icons -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+    />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'ET_app/css/style.css' %}" />
+
+    <style>
+      /* ===== NAVBAR SAFETY ===== */
+      header {
+        position: relative;
+        z-index: 1000;
+      }
+
+      .navbar {
+        z-index: 1001;
+      }
+
+      .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #172c40;
+        text-decoration: none;
+        letter-spacing: 1px;
+      }
+
+      .logo:hover {
+        color: #b5c6d0;
+      }
+
+      /* ===== EXPENSE LIST ===== */
+      .expense-container {
+        width: 85%;
+        margin: 140px auto 40px; /* 👈 pushes below fixed navbar */
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+      }
+
+      .filter-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .filter-bar input,
+      .filter-bar button {
+        padding: 8px 12px;
+      }
+
+      .total-box {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .expense-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .expense-table th,
+      .expense-table td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+
+      .expense-table th {
+        background: #f4f6f8;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <header>
+      <nav class="navbar">
+        <a href="#" class="logo">Expense Tracker</a>
+
+        <ul class="links">
+          <li><a href="{% url 'login' %}">Home</a></li>
+          <li><a href="{% url 'expense_list' %}">Expense List</a></li>
+          {% comment %} <li><a href="#">About</a></li> {% endcomment %}
+          {% comment %} <li><a href="#">Contact</a></li> {% endcomment %}
+        </ul>
+
+        <button id="logOutbutton" class="login-btn" onclick="log_out()">
+          LOG OUT
+        </button>
+
+        <button id="logInbutton" class="login-btn" onclick="openLogin()">
+          LOG IN
+        </button>
+      </nav>
+    </header>
+
+    <!-- ===== EXPENSE LIST ===== -->
+    <div class="expense-container">
+      <h2>My Expenses</h2>
+
+      <div class="filter-bar">
+        <input type="date" id="fromDate" />
+        <input type="date" id="toDate" />
+        <button onclick="fetchExpenses()">Filter</button>
+      </div>
+
+      <div class="total-box">
+        Total: ₹ <span id="totalAmount">0</span>
+      </div>
+
+      <table class="expense-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="expenseBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ===== LOGIN POPUP ===== -->
+    <div class="blur-bg-overlay"></div>
+
+    <div class="form-popup">
+  <span class="close-btn material-symbols-rounded" onclick="closeAll()">close</span>
+
+  <!-- LOGIN FORM -->
+  <div class="form-box login" id="loginBox">
+    <div class="form-details">
+      <h2>Welcome Back</h2>
+      <p>Please login to continue</p>
+    </div>
+
+    <div class="form-content">
+      <h2>LOGIN</h2>
+      <form onsubmit="login(event)">
+        <div class="input-field">
+          <input id="login-username" type="text" required />
+          <label>Username</label>
+        </div>
+
+        <div class="input-field">
+          <input id="login-password" type="password" required />
+          <label>Password</label>
+        </div>
+
+        <button>Log In</button>
+      </form>
+
+      <p class="switch">
+        Don’t have an account?
+        <span onclick="showSignup()">Sign Up</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <div class="form-box signup" id="signupBox" style="display:none;">
+    <div class="form-details">
+      <h2>Create Account</h2>
+      <p>Join us today</p>
+    </div>
+
+    <div class="form-content">
+      <h2>SIGN UP</h2>
+      <form onsubmit="signup(event)">
+        <div class="input-field">
+          <input type="text" required />
+          <label>Username</label>
+        </div>
+
+        <div class="input-field">
+          <input type="email" required />
+          <label>Email</label>
+        </div>
+
+        <div class="input-field">
+          <input type="password" required />
+          <label>Password</label>
+        </div>
+
+        <button>Create Account</button>
+      </form>
+
+      <p class="switch">
+        Already have an account?
+        <span onclick="showLogin()">Login</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSignup() {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("signupBox").style.display = "block";
+  }
+
+  function showLogin() {
+    document.getElementById("signupBox").style.display = "none";
+    document.getElementById("loginBox").style.display = "block";
+  }
+
+  function closeAll() {
+    document.querySelector(".form-popup").style.display = "none";
+  }
+
+  function login(e) {
+    e.preventDefault();
+    alert("Login submitted");
+  }
+
+  function signup(e) {
+    e.preventDefault();
+    alert("Signup submitted");
+  }
+</script>
+
+
+    <!-- ===== JS ===== -->
+    <script>
+      function openLogin() {
+        document.body.classList.add("show-login");
+      }
+
+      function closeAll() {
+        document.body.classList.remove("show-login");
+      }
+
+      function log_view() {
+        const token = localStorage.getItem("access");
+        logInbutton.style.display = token ? "none" : "block";
+        logOutbutton.style.display = token ? "block" : "none";
+      }
+      log_view();
+    </script>
+
+    <!-- LOGIN -->
+    <script>
+      async function login(event) {
+        event.preventDefault();
+
+        const res = await fetch("http://127.0.0.1:8000/token/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem("access", data.access);
+          localStorage.setItem("refresh", data.refresh);
+          window.location.reload();
+        } else {
+          alert("Invalid credentials");
+        }
+      }
+    </script>
+
+    <!-- LOGOUT -->
+    <script>
+      function log_out() {
+        localStorage.clear();
+        window.location.reload();
+      }
+    </script>
+
+    <!-- FETCH EXPENSES -->
+    <script>
+async function fetchExpenses() {
+  let access = localStorage.getItem("access");
+  if (!access) return;
+
+  let url = "http://127.0.0.1:8000/expense/";
+  let params = [];
+
+  if (fromDate.value) params.push(`from=${fromDate.value}`);
+  if (toDate.value) params.push(`to=${toDate.value}`);
+  if (params.length) url += "?" + params.join("&");
+
+  console.log('filter clicked')
+  console.log(url)
+
+  let res = await fetch(url, {
+    headers: { Authorization: "Bearer " + access },
+  });
+
+  // 🔁 access token expired
+  if (res.status === 401) {
+    const newAccess = await refreshAccessToken();
+    if (!newAccess) return;
+
+    // retry request with new token
+    res = await fetch(url, {
+      headers: { Authorization: "Bearer " + newAccess },
+    });
+  }
+
+  if (!res.ok) return alert("Failed to load expenses");
+
+  const json = await res.json();
+  const data = json.results || json;
+
+  expenseBody.innerHTML = "";
+  let total = 0;
+
+  data.forEach((e) => {
+    total += Number(e.amount);
+    expenseBody.innerHTML += `
+      <tr>
+        <td>${e.created_at?.slice(0, 10) || "-"}</td>
+        <td>${e.category_name || e.category}</td>
+        <td>${e.description}</td>
+        <td>₹ ${e.amount}</td>
+      </tr>
+    `;
+  });
+
+  totalAmount.innerText = total;
+}
+
+document.addEventListener("DOMContentLoaded", fetchExpenses);
+</script>
+
+
+    <script>
+async function refreshAccessToken() {
+  const refresh = localStorage.getItem("refresh");
+  if (!refresh) return null;
+
+
+  const res = await fetch("http://127.0.0.1:8000/refresh_token/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refresh }),
+  });
+
+  if (!res.ok) {
+    // refresh token also expired → force logout
+    localStorage.clear();
+    window.location.href = "http://127.0.0.1:8000/login/";
+    return null;
+  }
+
+  const data = await res.json();
+  localStorage.setItem("access", data.access);
+  return data.access;
+}
+</script>
+
+  </body>
+</html>
